@@ -14,9 +14,9 @@ import {
   User
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
-export default function ExitoPage() {
+function ExitoContent() {
   const searchParams = useSearchParams();
   const nombre = searchParams.get('nombre') || '';
   const apellido = searchParams.get('apellido') || '';
@@ -247,5 +247,13 @@ export default function ExitoPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function ExitoPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <ExitoContent />
+    </Suspense>
   );
 }

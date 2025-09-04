@@ -11,8 +11,9 @@ import {
   Mail
 } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function ErrorPage() {
+function ErrorContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get('reason') || 'error-general';
 
@@ -251,5 +252,13 @@ export default function ErrorPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <ErrorContent />
+    </Suspense>
   );
 }
