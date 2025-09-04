@@ -2,23 +2,27 @@
 
 import Link from 'next/link';
 import { useActionState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CircleIcon, Loader2 } from 'lucide-react';
+import { CircleIcon, Loader2, Info } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
+    signIn, // Siempre usar signIn ahora
     { error: '' }
   );
+
+  // Detectar si estamos en /sign-up para mostrar mensaje especial
+  const isSignUpUrl = pathname === '/sign-up';
 
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -27,10 +31,26 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           <CircleIcon className="h-12 w-12 text-orange-500" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {mode === 'signin'
-            ? 'Sign in to your account'
-            : 'Create your account'}
+          Iniciar sesión
         </h2>
+        
+        {isSignUpUrl && (
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-start">
+              <Info className="h-5 w-5 text-orange-600 mt-0.5 mr-2 flex-shrink-0" />
+              <div className="text-sm text-orange-700">
+                <p className="font-medium mb-1">¿Nuevo en Radio Community?</p>
+                <p>
+                  Para ser parte de nuestra comunidad, necesitás{' '}
+                  <Link href="/participacion" className="underline font-medium hover:text-orange-800">
+                    hacer tu aporte mensual
+                  </Link>{' '}
+                  primero. Si ya sos miembro, ingresá con tus datos.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -98,12 +118,10 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               {pending ? (
                 <>
                   <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                  Loading...
+                  Iniciando sesión...
                 </>
-              ) : mode === 'signin' ? (
-                'Sign in'
               ) : (
-                'Sign up'
+                'Iniciar sesión'
               )}
             </Button>
           </div>
@@ -116,23 +134,17 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">
-                {mode === 'signin'
-                  ? 'New to our platform?'
-                  : 'Already have an account?'}
+                ¿No tenés cuenta?
               </span>
             </div>
           </div>
 
           <div className="mt-6">
             <Link
-              href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
-                redirect ? `?redirect=${redirect}` : ''
-              }${priceId ? `&priceId=${priceId}` : ''}`}
+              href="/participacion"
               className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              {mode === 'signin'
-                ? 'Create an account'
-                : 'Sign in to existing account'}
+              Convertite en miembro
             </Link>
           </div>
         </div>

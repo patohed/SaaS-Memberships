@@ -20,6 +20,7 @@ export const users = pgTable('users', {
   paymentMethod: varchar('payment_method', { length: 20 }),
   votingRights: boolean('voting_rights').notNull().default(false),
   score: integer('score').notNull().default(0),
+  currentAmount: integer('current_amount').notNull().default(1800), // Monto pagado en centavos ($18)
   level: varchar('level', { length: 20 }).notNull().default('bronze'),
   levelUnlockedAt: timestamp('level_unlocked_at').defaultNow(),
   // Campos de perfil adicionales

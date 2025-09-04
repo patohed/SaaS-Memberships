@@ -27,9 +27,65 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useState } from 'react';
+import useSWR from 'swr';
+
+// Tipo para el usuario con información adicional
+interface UserType {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  membershipStatus: string;
+  paymentMethod?: string;
+  votingRights: boolean;
+  score: number;
+  level: string;
+  currentAmount?: number; // Monto pagado en centavos
+  createdAt: string;
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // Componente del Header con info del usuario
 function UserHeader() {
+  const { data: user, isLoading } = useSWR<UserType>('/api/user', fetcher);
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-xl mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="h-16 w-16 bg-white/20 rounded-full animate-pulse"></div>
+          <div>
+            <div className="h-6 w-32 bg-white/20 rounded animate-pulse mb-2"></div>
+            <div className="h-4 w-24 bg-white/20 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-xl mb-6">
+        <div className="text-center">
+          <p>Error al cargar los datos del usuario</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Obtener iniciales del nombre del usuario
+  const initials = user.name
+    .split(' ')
+    .map(n => n.charAt(0).toUpperCase())
+    .join('')
+    .slice(0, 2);
+
+  // Formatear fecha de creación
+  const memberSince = user.createdAt 
+    ? new Intl.DateTimeFormat('es-ES', { month: 'short', year: 'numeric' }).format(new Date(user.createdAt))
+    : 'N/A';
+
   return (
     <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-xl mb-6">
       <div className="flex items-center justify-between">
@@ -37,28 +93,28 @@ function UserHeader() {
           <Avatar className="h-16 w-16 border-2 border-white">
             <AvatarImage src="/placeholder-avatar.jpg" />
             <AvatarFallback className="bg-white text-orange-500 text-xl font-bold">
-              JP
+              {initials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-2xl font-bold">OYENTE #0005</h1>
-            <p className="text-orange-100">Juan Pérez</p>
+            <h1 className="text-2xl font-bold">OYENTE #{user.id?.toString().padStart(4, '0')}</h1>
+            <p className="text-orange-100">{user.name}</p>
             <div className="flex items-center space-x-2 mt-1">
               <Badge variant="secondary" className="bg-white/20 text-white">
-                Miembro Activo
+                {user.membershipStatus === 'active' ? 'Miembro Activo' : 'Miembro Pendiente'}
               </Badge>
               <Badge variant="secondary" className="bg-white/20 text-white">
-                Nivel Bronce
+                Nivel {user.level === 'bronze' ? 'Bronce' : user.level === 'silver' ? 'Plata' : 'Oro'}
               </Badge>
             </div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm text-orange-100">Miembro desde</div>
-          <div className="text-xl font-semibold">Sept 2025</div>
-          <div className="text-sm text-orange-100">
-            <Clock className="h-4 w-4 inline mr-1" />
-            Estado: Al día
+          <p className="text-sm text-orange-100">Miembro desde</p>
+          <p className="font-semibold">{memberSince}</p>
+          <div className="flex items-center mt-2">
+            <Clock className="h-4 w-4 mr-1" />
+            <span className="text-sm">Estado: {user.votingRights ? 'Al día' : 'Pendiente'}</span>
           </div>
         </div>
       </div>
@@ -68,8 +124,18 @@ function UserHeader() {
 
 // Componente de estadísticas generales
 function CommunityStats() {
+  const { data: user } = useSWR<UserType>('/api/user', fetcher);
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <Card>
+        <CardContent className="p-4 text-center">
+          <div className="text-2xl font-bold text-orange-600 mb-1">
+            ${((user?.currentAmount || 1800) / 100).toFixed(0)}
+          </div>
+          <div className="text-sm text-gray-600">Tu Aporte</div>
+        </CardContent>
+      </Card>
       <Card>
         <CardContent className="p-4 text-center">
           <div className="text-2xl font-bold text-orange-600 mb-1">128</div>
@@ -218,6 +284,44 @@ function ActiveVotations() {
 
 // Componente del perfil personal
 function PersonalProfile() {
+  const { data: user, isLoading } = useSWR<UserType>('/api/user', fetcher);
+
+  if (isLoading) {
+    return (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <User className="h-5 w-5 mr-2" />
+            Mi Perfil de Oyente
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <User className="h-5 w-5 mr-2" />
+            Mi Perfil de Oyente
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Error al cargar los datos del perfil</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -234,15 +338,25 @@ function PersonalProfile() {
               <div className="space-y-2 mt-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Nombre:</span>
-                  <span className="text-sm font-medium">Juan Pérez</span>
+                  <span className="text-sm font-medium">{user.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Email:</span>
-                  <span className="text-sm font-medium">juan.perez@test.com</span>
+                  <span className="text-sm font-medium">{user.email}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">WhatsApp:</span>
-                  <span className="text-sm font-medium">+54 11 1234-5678</span>
+                  <span className="text-sm text-gray-600">Método de pago:</span>
+                  <span className="text-sm font-medium">
+                    {user.paymentMethod === 'mercadopago' ? 'MercadoPago' : 
+                     user.paymentMethod === 'paypal' ? 'PayPal' : 
+                     'No especificado'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Monto actual:</span>
+                  <span className="text-sm font-medium text-green-600">
+                    ${((user.currentAmount || 1800) / 100).toFixed(2)} USD
+                  </span>
                 </div>
               </div>
             </div>
@@ -252,16 +366,26 @@ function PersonalProfile() {
               <h4 className="font-semibold text-gray-800">Estadísticas de Participación</h4>
               <div className="space-y-2 mt-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Votaciones participadas:</span>
-                  <span className="text-sm font-medium">8/12</span>
+                  <span className="text-sm text-gray-600">Estado de membresía:</span>
+                  <Badge variant={user.membershipStatus === 'active' ? 'default' : 'secondary'} className="text-xs">
+                    {user.membershipStatus === 'active' ? 'Activo' : 'Pendiente'}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Propuestas enviadas:</span>
-                  <span className="text-sm font-medium">3</span>
+                  <span className="text-sm text-gray-600">Derechos de voto:</span>
+                  <Badge variant={user.votingRights ? 'default' : 'secondary'} className="text-xs">
+                    {user.votingRights ? 'Habilitado' : 'Pendiente'}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Nivel de participación:</span>
-                  <Badge variant="secondary" className="text-xs">Alto</Badge>
+                  <span className="text-sm text-gray-600">Nivel:</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {user.level === 'bronze' ? 'Bronce' : user.level === 'silver' ? 'Plata' : 'Oro'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Puntuación:</span>
+                  <span className="text-sm font-medium">{user.score} pts</span>
                 </div>
               </div>
             </div>

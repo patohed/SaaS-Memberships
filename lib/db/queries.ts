@@ -1,6 +1,6 @@
-import { desc, and, eq, isNull } from 'drizzle-orm';
+import { desc, and, eq, isNull, sum } from 'drizzle-orm';
 import { db } from './drizzle';
-import { users } from './schema';
+import { users, membershipPayments } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
 
@@ -33,5 +33,21 @@ export async function getUser() {
     return null;
   }
 
-  return user[0];
+  // Obtener el monto total pagado por el usuario
+  const paymentResult = await db
+    .select({ totalAmount: sum(membershipPayments.amount) })
+    .from(membershipPayments)
+    .where(
+      and(
+        eq(membershipPayments.userId, sessionData.user.id),
+        eq(membershipPayments.status, 'completed')
+      )
+    );
+
+  const currentAmount = paymentResult[0]?.totalAmount || 0;
+
+  return {
+    ...user[0],
+    currentAmount: Number(currentAmount)
+  };
 }

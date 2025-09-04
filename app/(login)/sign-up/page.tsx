@@ -4,7 +4,7 @@ import { Login } from '../login';
 export default function SignUpPage() {
   return (
     <Suspense>
-      <Login mode="signup" />
+      <Login mode="signin" />
     </Suspense>
   );
 }
