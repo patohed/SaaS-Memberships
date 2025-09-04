@@ -57,7 +57,7 @@ Tu demo estará disponible en: `https://radio-community-demo.vercel.app`
 ## URLs de prueba después del despliegue:
 
 - **Página principal**: `https://tu-dominio.vercel.app/`
-- **Registro**: `https://tu-dominio.vercel.app/registro-chino`
+- **Registro**: `https://tu-dominio.vercel.app/participacion`
 - **Login**: `https://tu-dominio.vercel.app/sign-in`
 - **Dashboard**: `https://tu-dominio.vercel.app/dashboard`
 

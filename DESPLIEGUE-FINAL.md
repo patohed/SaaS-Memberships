@@ -118,7 +118,7 @@ Una vez desplegado, tendrás:
 ## 🎯 URLS DE PRUEBA (después del despliegue):
 
 - **Principal**: `https://tu-dominio.vercel.app/`
-- **Registro**: `https://tu-dominio.vercel.app/registro-chino`
+- **Registro**: `https://tu-dominio.vercel.app/participacion`
 - **Login**: `https://tu-dominio.vercel.app/sign-in`
 - **Dashboard**: `https://tu-dominio.vercel.app/dashboard`
 

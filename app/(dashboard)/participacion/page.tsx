@@ -2,22 +2,23 @@
 
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   Users, 
   Heart, 
-  Vote,
-  Shield,
-  ArrowRight,
-  CheckCircle,
-  DollarSign,
-  Calendar,
   Radio,
-  Star,
   ArrowLeft,
-  Loader2
+  Loader2,
+  Headphones,
+  User,
+  Mail,
+  Phone,
+  Globe,
+  CreditCard,
+  Shield,
+  Vote
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagarConMercadoPago, pagarConPayPal } from './actions';
@@ -94,255 +95,149 @@ export default function ParticipacionPage() {
   if (step === 'payment') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-        {/* Header */}
-        <section className="py-16 bg-gradient-to-r from-orange-500 to-red-500 text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              ¡Gracias {userData.nombre} {userData.apellido}!
+        <div className="min-h-screen flex flex-col justify-center">
+          <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
+            
+            {/* Logo/Icono central */}
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center space-x-3">
+                <Radio className="h-12 w-12 text-orange-500" />
+                <CreditCard className="h-10 w-10 text-orange-600" />
+              </div>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Finalizar Membresía
             </h1>
-            <p className="text-xl mb-8 opacity-90">
-              Estás a un paso de ser parte de Radio Community
+            
+            <p className="text-lg text-gray-600 mb-8">
+              Elegí tu método de pago preferido
             </p>
-          </div>
-        </section>
 
-        {/* Confirmación de pago */}
-        <section className="py-16">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Card className="border-2 border-orange-200 shadow-lg">
+            <Card className="bg-white shadow-lg border border-gray-200">
               <CardContent className="p-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Tu aporte es de</h2>
-                  <div className="text-4xl font-bold text-orange-600 mb-4">18 USD</div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <p className="text-gray-700 mb-2">
-                      Es un pago único de <strong>18 USD</strong> por tu participación completa en el proyecto.
-                    </p>
-                    <p className="text-gray-700">
-                      Son <strong>18 USD en total</strong> por las 18 semanas completas del proyecto.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Métodos de pago */}
                 <div className="space-y-4">
-                  <div className="border rounded-lg p-6 hover:border-orange-300 transition-colors">
-                    <div className="flex items-start space-x-4 mb-4">
-                      <div className="w-12 h-12 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-lg">
-                        MP
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">MercadoPago</h3>
-                        <p className="text-gray-600 text-sm">
-                          Pagá con tarjeta de crédito, débito, efectivo o transferencia bancaria. 
-                          Se cobrará en pesos argentinos. Disponible para Argentina y otros países de Latinoamérica.
-                        </p>
-                      </div>
-                    </div>
-                    <Button 
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                      onClick={handlePagoMercadoPago}
-                      disabled={isPending}
-                    >
-                      {isPending && processingMethod === 'mercadopago' ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Procesando...
-                        </>
-                      ) : (
-                        'Pagar con MercadoPago'
-                      )}
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={handlePagoMercadoPago}
+                    disabled={isPending}
+                    className="w-full flex justify-center items-center py-4 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50"
+                  >
+                    {processingMethod === 'mercadopago' && isPending ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="mr-2 h-5 w-5" />
+                        Pagar con MercadoPago
+                      </>
+                    )}
+                  </Button>
 
-                  <div className="border rounded-lg p-6 hover:border-orange-300 transition-colors">
-                    <div className="flex items-start space-x-4 mb-4">
-                      <div className="w-12 h-12 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-lg">
-                        PP
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">PayPal</h3>
-                        <p className="text-gray-600 text-sm">
-                          Pagá de forma segura con tu cuenta PayPal o tarjeta de crédito. 
-                          Disponible internacionalmente con protección al comprador.
-                        </p>
-                      </div>
-                    </div>
-                    <Button 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={handlePagoPayPal}
-                      disabled={isPending}
-                    >
-                      {isPending && processingMethod === 'paypal' ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Procesando...
-                        </>
-                      ) : (
-                        'Pagar con PayPal'
-                      )}
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={handlePagoPayPal}
+                    disabled={isPending}
+                    className="w-full flex justify-center items-center py-4 px-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50"
+                  >
+                    {processingMethod === 'paypal' && isPending ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="mr-2 h-5 w-5" />
+                        Pagar con PayPal
+                      </>
+                    )}
+                  </Button>
                 </div>
 
-                <div className="text-center mt-6">
-                  <p className="text-sm text-gray-500 mb-4">
-                    Cotización USD aproximada: 1 USD = 1.300 ARS (actualizada hoy)
-                  </p>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={handleBackToForm}
-                    className="text-gray-600 hover:text-gray-800"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Volver al formulario
-                  </Button>
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-green-500 mr-2" />
+                    <p className="text-sm text-gray-600">
+                      Pago seguro · $18/mes · Cancela cuando quieras
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
+            <Button
+              onClick={handleBackToForm}
+              variant="outline"
+              className="mt-6 text-gray-500 hover:text-orange-600"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver a editar datos
+            </Button>
           </div>
-        </section>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-      {/* Header */}
-      <section className="py-16 bg-gradient-to-r from-orange-500 to-red-500 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Únete a Radio Community
-          </h1>
-          <p className="text-xl mb-8 opacity-90">
-            Conviértete en parte de la primera radio democrática de Argentina
-          </p>
-          <div className="flex items-center justify-center space-x-6 text-sm">
-            <div className="flex items-center">
-              <Users className="h-5 w-5 mr-2" />
-              127 miembros activos
-            </div>
-            <div className="flex items-center">
-              <Calendar className="h-5 w-5 mr-2" />
-              18 semanas restantes
-            </div>
-            <div className="flex items-center">
-              <DollarSign className="h-5 w-5 mr-2" />
-              $42,350 recaudados
+      {/* Header minimalista */}
+      <div className="min-h-screen flex flex-col justify-center">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          
+          {/* Logo/Icono central */}
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center space-x-3">
+              <Radio className="h-12 w-12 text-orange-500" />
+              <Headphones className="h-10 w-10 text-orange-600" />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Cómo funciona */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              ¿Cómo funciona Radio Community?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Un experimento democrático donde cada oyente es dueño de su programa
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <Card className="text-center border-2 hover:border-orange-200 transition-colors">
-              <CardContent className="pt-8 pb-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="h-8 w-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">1. Haces tu aporte</h3>
-                <p className="text-gray-600">
-                  Con tu contribución te convertís en miembro activo de la comunidad
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-2 hover:border-orange-200 transition-colors">
-              <CardContent className="pt-8 pb-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Vote className="h-8 w-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">2. Votas propuestas</h3>
-                <p className="text-gray-600">
-                  Decidís sobre el contenido, los invitados y el futuro del programa
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center border-2 hover:border-orange-200 transition-colors">
-              <CardContent className="pt-8 pb-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Radio className="h-8 w-8 text-orange-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">3. Construimos juntos</h3>
-                <p className="text-gray-600">
-                  El programa se hace realidad según las decisiones de la comunidad
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Descripción del proyecto */}
-          <div className="text-center mb-12">
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Durante 18 semanas, el periodismo depende de vos. Todos los que aporten 18 dólares (1 dólar por semana) 
-              serán participantes de una experiencia única: ser una comunidad activa detrás de un programa de radio.
-            </p>
-          </div>
-
-          {/* Asamblea */}
-          <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-8 mb-12 text-center">
-            <h3 className="text-2xl font-bold mb-4">Asamblea comunitaria</h3>
-            <p className="text-lg text-gray-700 mb-4">
-              Cada viernes, en los últimos 18 minutos del programa, vamos a decidir juntos sobre qué hacer 
-              con el 18% de los fondos compartidos.
-            </p>
-            <p className="text-gray-600">
-              ¿Hacemos una fiesta a fin de año? ¿Lo donamos? ¿O lo acumulamos para hacer algo aún más grande? 
-              La comunidad decide en vivo, porque ustedes son los verdaderos dueños.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Formulario de registro */}
-      <section className="py-16 bg-white">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="border-2 border-orange-200 shadow-lg">
-            <CardHeader className="text-center bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg">
-              <CardTitle className="text-2xl">
-                <Star className="h-6 w-6 inline mr-2" />
-                QUIERO SER OYENTE
-              </CardTitle>
-              <p className="opacity-90">
-                Completá tus datos para ser parte de la comunidad
-              </p>
-            </CardHeader>
+          
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+              Convertite en Oyente
+            </h1>
             
+            <p className="text-lg md:text-xl text-gray-600 mb-2">
+              Únete a la comunidad que decide el futuro de la radio
+            </p>
+            
+            <p className="text-sm text-gray-500 mb-8">
+              $18/mes · 18 semanas · Tu voz cuenta
+            </p>
+          </div>
+
+          {/* Formulario minimalista */}
+          <Card className="bg-white shadow-lg border border-gray-200">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
+                
                 {/* Información personal */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="nombre">Nombre</Label>
+                    <Label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                      <User className="h-4 w-4 text-gray-500 mr-2" />
+                      Nombre
+                    </Label>
                     <Input 
                       id="nombre" 
-                      placeholder="Tu nombre" 
-                      className="mt-1"
+                      placeholder="Ingresá tu nombre" 
+                      className="h-12 px-4"
                       value={userData.nombre}
                       onChange={(e) => setUserData({...userData, nombre: e.target.value})}
                       required
                     />
                   </div>
+                  
                   <div>
-                    <Label htmlFor="apellido">Apellido</Label>
+                    <Label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                      <User className="h-4 w-4 text-gray-500 mr-2" />
+                      Apellido
+                    </Label>
                     <Input 
                       id="apellido" 
-                      placeholder="Tu apellido" 
-                      className="mt-1"
+                      placeholder="Ingresá tu apellido" 
+                      className="h-12 px-4"
                       value={userData.apellido}
                       onChange={(e) => setUserData({...userData, apellido: e.target.value})}
                       required
@@ -351,12 +246,15 @@ export default function ParticipacionPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">E-mail</Label>
+                  <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <Mail className="h-4 w-4 text-gray-500 mr-2" />
+                    Email
+                  </Label>
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="tu@email.com" 
-                    className="mt-1"
+                    placeholder="Ingresá tu email" 
+                    className="h-12 px-4"
                     value={userData.email}
                     onChange={(e) => setUserData({...userData, email: e.target.value})}
                     required
@@ -365,11 +263,14 @@ export default function ParticipacionPage() {
 
                 {/* Teléfono con código de país */}
                 <div>
-                  <Label htmlFor="telefono">Teléfono (WhatsApp)</Label>
-                  <div className="grid grid-cols-5 gap-2 mt-1">
+                  <Label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <Phone className="h-4 w-4 text-gray-500 mr-2" />
+                    Teléfono (WhatsApp)
+                  </Label>
+                  <div className="grid grid-cols-5 gap-3">
                     <div className="col-span-2">
                       <select
-                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                         value={userData.codigoPais}
                         onChange={(e) => setUserData({...userData, codigoPais: e.target.value})}
                       >
@@ -384,7 +285,8 @@ export default function ParticipacionPage() {
                       <Input
                         id="telefono"
                         type="tel"
-                        placeholder="11 1234 5678"
+                        placeholder="Ej: 11 1234 5678"
+                        className="h-12 px-4"
                         value={userData.telefono}
                         onChange={(e) => setUserData({...userData, telefono: e.target.value})}
                         required
@@ -393,68 +295,75 @@ export default function ParticipacionPage() {
                   </div>
                 </div>
 
-                {/* Botón de envío */}
-                <Button 
-                  type="submit"
-                  size="lg" 
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-lg py-6"
-                  disabled={!userData.nombre || !userData.apellido || !userData.email || !userData.telefono}
-                >
-                  <Heart className="mr-2 h-5 w-5" />
-                  QUIERO SER OYENTE
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                {/* Beneficios resumidos */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border border-orange-100">
+                  <h3 className="font-semibold text-gray-900 mb-3 text-center">
+                    ¿Qué incluye tu membresía?
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center">
+                      <Vote className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                      <p className="font-medium">Voto en decisiones</p>
+                    </div>
+                    <div className="text-center">
+                      <Radio className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                      <p className="font-medium">Acceso exclusivo</p>
+                    </div>
+                    <div className="text-center">
+                      <Heart className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                      <p className="font-medium">Comunidad activa</p>
+                    </div>
+                  </div>
+                </div>
 
-                <p className="text-sm text-gray-500 text-center">
-                  Al continuar, accedés a una página segura para completar tu aporte de 18 USD
-                </p>
+                <Button
+                  type="submit"
+                  className="w-full flex justify-center items-center py-4 px-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg shadow-lg transform hover:scale-[1.02] transition-all duration-200 text-lg font-medium"
+                >
+                  <Users className="mr-2 h-5 w-5" />
+                  Continuar al Pago
+                </Button>
               </form>
             </CardContent>
           </Card>
-        </div>
-      </section>
 
-      {/* FAQ rápido */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-center mb-8">Preguntas frecuentes</h2>
-          
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <h4 className="font-semibold mb-2">¿Esto es una suscripción que me va a cobrar todos los meses?</h4>
-                <p className="text-gray-600">
-                  No, es un <strong>pago único de 18 USD</strong> por todo el proyecto completo de 18 semanas.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h4 className="font-semibold mb-2">¿Cómo me asocio a Radio Community?</h4>
-                <p className="text-gray-600">
-                  Es fácil: elegís si pagar con MercadoPago o PayPal, hacés el aporte y ¡listo! Te creamos tu cuenta automáticamente.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h4 className="font-semibold mb-2">¿Cómo funcionan las votaciones?</h4>
-                <p className="text-gray-600">
-                  Cada viernes hay votaciones sobre diferentes aspectos del programa. Un miembro = un voto.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/" className="text-orange-600 hover:text-orange-700 font-medium">
-              ← Volver al inicio
+          {/* Links de navegación */}
+          <div className="mt-8 text-center space-y-4">
+            <Link 
+              href="/sign-in" 
+              className="text-sm text-gray-500 hover:text-orange-600 transition-colors block"
+            >
+              ¿Ya sos miembro? Iniciá sesión
+            </Link>
+            
+            <Link 
+              href="/" 
+              className="text-sm text-gray-500 hover:text-orange-600 transition-colors inline-flex items-center"
+            >
+              <ArrowLeft className="mr-1 h-4 w-4" />
+              Volver al inicio
             </Link>
           </div>
+
+          {/* Estadísticas minimalistas */}
+          <div className="mt-8 border-t border-gray-200 pt-8">
+            <div className="grid grid-cols-3 gap-6 max-w-md mx-auto text-center">
+              <div>
+                <div className="text-2xl font-bold text-orange-600">127</div>
+                <div className="text-xs text-gray-500">Miembros</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">18</div>
+                <div className="text-xs text-gray-500">Semanas</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">$42K</div>
+                <div className="text-xs text-gray-500">Fondos</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
