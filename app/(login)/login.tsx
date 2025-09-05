@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
+import { useMetrics } from '@/lib/hooks/useMetrics';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +29,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
+  const { metrics, loading: metricsLoading } = useMetrics();
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     signIn, // Siempre usar signIn ahora
     { error: '' }
@@ -205,7 +207,13 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
             <p className="text-center text-xs text-gray-600 mb-3 font-medium">Nuestra comunidad</p>
             <div className="flex justify-around text-xs">
               <div className="text-center">
-                <div className="font-bold text-orange-600 text-lg">127</div>
+                <div className="font-bold text-orange-600 text-lg">
+                  {metricsLoading ? (
+                    <div className="animate-pulse bg-gray-200 h-6 w-8 rounded mx-auto"></div>
+                  ) : (
+                    metrics?.totalUsers || 0
+                  )}
+                </div>
                 <div className="text-gray-500">Miembros activos</div>
               </div>
               <div className="text-center">
@@ -213,7 +221,13 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 <div className="text-gray-500">Semanas restantes</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-orange-600 text-lg">$42K</div>
+                <div className="font-bold text-orange-600 text-lg">
+                  {metricsLoading ? (
+                    <div className="animate-pulse bg-gray-200 h-6 w-8 rounded mx-auto"></div>
+                  ) : (
+                    `$${metrics?.dineroTotalRecaudado || 0}`
+                  )}
+                </div>
                 <div className="text-gray-500">Recaudado</div>
               </div>
             </div>

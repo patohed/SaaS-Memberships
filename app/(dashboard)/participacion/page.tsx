@@ -381,7 +381,7 @@ export default function ParticipacionPage() {
                   {metricsLoading ? (
                     <div className="animate-pulse bg-gray-200 h-8 w-12 rounded mx-auto"></div>
                   ) : (
-                    metrics?.activeUsers || 0
+                    metrics?.totalUsers || 0
                   )}
                 </div>
                 <div className="text-xs text-gray-500">Miembros</div>
