@@ -17,25 +17,6 @@ import {
   Clock
 } from 'lucide-react';
 
-/**
- * Enhanced Metrics Component with Better UX
- * Counters animados, loading states profesionales, y microinteracciones
- * Versión con CSS animations (sin framer-motion)
- */
-
-'use client';
-
-import { useEffect, useState } from 'react';
-import { 
-  Users, 
-  DollarSign, 
-  Calendar,
-  RefreshCw, 
-  Loader2,
-  TrendingUp,
-  Clock
-} from 'lucide-react';
-
 interface MetricsData {
   totalUsers: number;
   dineroTotalRecaudado: number;
