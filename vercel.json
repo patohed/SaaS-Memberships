@@ -1,8 +1,9 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "devCommand": "npm run dev", 
   "installCommand": "npm install",
   "framework": "nextjs",
+  "public": true,
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30

@@ -116,26 +116,26 @@ class RateLimiter {
 }
 
 // Instancias de rate limiter para diferentes endpoints
-// Límites más permisivos en desarrollo
+// Límites más permisivos en desarrollo, apropiados para producción
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const generalLimiter = new RateLimiter(
-  isDevelopment ? 1000 : 100,   // 1000/15min en dev, 100/15min en prod
+  isDevelopment ? 1000 : 300,   // 1000/15min en dev, 300/15min en prod (más permisivo)
   15 * 60 * 1000
 ); 
 
 export const authLimiter = new RateLimiter(
-  isDevelopment ? 50 : 5,       // 50/15min en dev, 5/15min en prod
+  isDevelopment ? 50 : 15,      // 50/15min en dev, 15/15min en prod (más permisivo)
   15 * 60 * 1000
 );      
 
 export const paymentLimiter = new RateLimiter(
-  isDevelopment ? 100 : 10,     // 100/hour en dev, 10/hour en prod
+  isDevelopment ? 100 : 20,     // 100/hour en dev, 20/hour en prod (más permisivo)
   60 * 60 * 1000
 );  
 
 export const metricsLimiter = new RateLimiter(
-  isDevelopment ? 2000 : 200,   // 2000/15min en dev, 200/15min en prod
+  isDevelopment ? 2000 : 500,   // 2000/15min en dev, 500/15min en prod (más permisivo)
   15 * 60 * 1000
 );
 

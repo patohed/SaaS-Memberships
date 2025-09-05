@@ -36,7 +36,14 @@ export async function middleware(request: NextRequest) {
     rateLimitResult = limiter.check(ip);
     
     if (!rateLimitResult.allowed) {
-      console.warn(`🚫 Rate limit excedido para ${ip} en ${pathname}`);
+      // Logging más detallado en desarrollo, más conciso en producción
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`🚫 Rate limit excedido para ${ip} en ${pathname}`);
+      } else {
+        // En producción, solo logear IPs que exceden significativamente el límite
+        console.warn(`Rate limit exceeded: ${pathname}`);
+      }
+      
       const response = new NextResponse('Too Many Requests', { status: 429 });
       
       // Aplicar headers de rate limit
