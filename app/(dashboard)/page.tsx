@@ -93,7 +93,7 @@ export default function HomePage() {
           {/* Estadísticas minimalistas */}
           <MinimalMetrics 
             metrics={metrics ? {
-              totalUsers: metrics.activeUsers || 0,
+              totalUsers: metrics.totalUsers || 0, // Cambiado de activeUsers a totalUsers
               dineroTotalRecaudado: metrics.dineroTotalRecaudado || 0,
               weeksRemaining: 18
             } : null}
@@ -147,7 +147,7 @@ export default function HomePage() {
             ) : error ? (
               'Únete a nuestra comunidad activa'
             ) : (
-              `Únete a los ${metrics?.activeUsers || 0} miembros activos`
+              `Únete a los ${metrics?.totalUsers || 0} miembros activos`
             )}
           </p>
           

@@ -27,7 +27,9 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useState } from 'react';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
+import { useRouter } from 'next/navigation';
+import { signOut } from '@/app/(login)/actions';
 import { useMetrics } from '@/lib/hooks/useMetrics';
 import { MetricSkeleton, CommunityLoading } from '@/components/ui/loading-animations';
 
@@ -153,7 +155,7 @@ function CommunityStats() {
             ) : metricsError ? (
               <span className="text-red-500 text-sm">Error</span>
             ) : (
-              metrics?.activeUsers || 0
+              metrics?.totalUsers || 0
             )}
           </div>
           <div className="text-sm text-gray-600">Oyentes Activos</div>
@@ -179,7 +181,7 @@ function CommunityStats() {
             {metricsLoading ? (
               <MetricSkeleton variant="radio" size="md" />
             ) : (
-              "17"
+              "18"
             )}
           </div>
           <div className="text-sm text-gray-600">Semanas Restantes</div>
@@ -496,6 +498,14 @@ function RecentActivity() {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await signOut();
+    mutate('/api/user');
+    router.push('/');
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -522,7 +532,7 @@ export default function DashboardPage() {
         
         {/* Botón de salir */}
         <div className="mt-8 text-center">
-          <Button variant="outline" className="text-gray-600">
+          <Button variant="outline" className="text-gray-600" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />
             Cerrar Sesión
           </Button>
