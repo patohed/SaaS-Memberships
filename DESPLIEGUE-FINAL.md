@@ -142,4 +142,4 @@ Una vez desplegado, tendrás:
 
 **🎙️ ¡Radio Community está lista para el mundo!**
 
-Este proyecto demuestra un sistema completo de radio comunitaria con participación democrática, inspirado en Buenas Tardes China pero con identidad propia.
+Este proyecto demuestra un sistema completo de radio comunitaria con participación democrática y tecnología moderna.

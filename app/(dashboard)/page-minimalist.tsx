@@ -23,7 +23,7 @@ import Link from 'next/link';
 export default function HomePage() {
   return (
     <main className="min-h-screen">
-      {/* Hero Section Minimalista - Estilo buenastardeschina.com.ar */}
+      {/* Hero Section Minimalista - Diseño limpio y profesional */}
       <section className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-orange-50 via-white to-red-50">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           

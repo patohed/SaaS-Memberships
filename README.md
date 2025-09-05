@@ -1,13 +1,13 @@
 # 🎙️ Radio Community - SaaS Memberships Demo
 
-Una plataforma de radio comunitaria inspirada en Buenas Tardes China, donde cada oyente tiene voz y voto en las decisiones del programa.
+Una plataforma de radio comunitaria donde cada oyente tiene voz y voto en las decisiones del programa.
 
 **Demo**: [Próximamente en Vercel]
 
 ## ✨ Características
 
 ### 🏠 Landing Page
-- Diseño inspirado en BTC con identidad propia
+- Diseño minimalista y profesional
 - Estadísticas en tiempo real de la comunidad
 - Call-to-action para registro de oyentes
 - Información del proyecto de 18 semanas

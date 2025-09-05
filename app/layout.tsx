@@ -5,7 +5,7 @@ import { getUser } from '@/lib/db/queries';
 import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
-  title: 'Radio Comunitaria - Buenas Tardes China',
+  title: 'Radio Community - Plataforma de Radio Comunitaria',
   description: 'La comunidad dueña de su programa radial'
 };
 

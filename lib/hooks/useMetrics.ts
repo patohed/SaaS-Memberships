@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { secureLog } from '@/lib/utils/secure-logger';
 
 interface Metrics {
@@ -18,12 +18,31 @@ interface MetricsResponse {
   error?: string;
 }
 
-export function useMetrics() {
+interface UseMetricsOptions {
+  autoRefresh?: boolean;
+  refreshInterval?: number; // en milisegundos
+  pauseOnHidden?: boolean; // pausar cuando la pestaña no es visible
+  maxRetries?: number;
+}
+
+export function useMetrics(options: UseMetricsOptions = {}) {
+  const {
+    autoRefresh = true,
+    refreshInterval = 2 * 60 * 1000, // 2 minutos por defecto (más conservador)
+    pauseOnHidden = true,
+    maxRetries = 3
+  } = options;
+
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isTabVisible = useRef(true);
+  const lastFetchTime = useRef<number>(0);
 
   const fetchMetrics = async (isRefresh = false) => {
     try {

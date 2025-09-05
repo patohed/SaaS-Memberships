@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMetrics } from '@/lib/hooks/useMetrics';
+import { useMetrics } from '@/lib/hooks/useMetrics-optimized';
 import { MinimalMetrics } from '@/components/ui/minimal-metrics';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,11 +25,27 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const { metrics, loading, error, isRefreshing, showSuccess, refreshMetrics } = useMetrics();
+  // Usar hook optimizado con configuración inteligente
+  const { 
+    metrics, 
+    loading, 
+    error, 
+    isRefreshing, 
+    showSuccess, 
+    refreshMetrics,
+    lastFetchTime,
+    isTabVisible 
+  } = useMetrics({
+    autoRefresh: true,
+    refreshInterval: 5 * 60 * 1000, // 5 minutos (mucho más conservador)
+    pauseOnHidden: true, // Pausar cuando la pestaña no es visible
+    maxRetries: 2,
+    minInterval: 30 * 1000 // Mínimo 30 segundos entre requests
+  });
   
   return (
     <main className="min-h-screen">
-      {/* Hero Section Minimalista - Estilo buenastardeschina.com.ar */}
+      {/* Hero Section Minimalista - Diseño limpio y profesional */}
       <section className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-orange-50 via-white to-red-50">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           
