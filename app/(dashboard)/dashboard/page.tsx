@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import useSWR from 'swr';
+import { useMetrics } from '@/lib/hooks/useMetrics';
+import { MetricSkeleton, CommunityLoading } from '@/components/ui/loading-animations';
 
 // Tipo para el usuario con información adicional
 interface UserType {
@@ -54,10 +56,16 @@ function UserHeader() {
     return (
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 rounded-xl mb-6">
         <div className="flex items-center space-x-4">
-          <div className="h-16 w-16 bg-white/20 rounded-full animate-pulse"></div>
-          <div>
-            <div className="h-6 w-32 bg-white/20 rounded animate-pulse mb-2"></div>
+          <div className="h-16 w-16 bg-white/20 rounded-full animate-pulse flex items-center justify-center">
+            <div className="h-8 w-8 bg-white/30 rounded-full animate-bounce"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-6 w-32 bg-white/20 rounded animate-pulse"></div>
             <div className="h-4 w-24 bg-white/20 rounded animate-pulse"></div>
+            <div className="flex space-x-2">
+              <div className="h-3 w-16 bg-white/20 rounded animate-pulse"></div>
+              <div className="h-3 w-12 bg-white/20 rounded animate-pulse"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -125,6 +133,7 @@ function UserHeader() {
 // Componente de estadísticas generales
 function CommunityStats() {
   const { data: user } = useSWR<UserType>('/api/user', fetcher);
+  const { metrics, loading: metricsLoading, error: metricsError } = useMetrics();
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
@@ -138,25 +147,55 @@ function CommunityStats() {
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600 mb-1">128</div>
+          <div className="text-2xl font-bold text-orange-600 mb-1">
+            {metricsLoading ? (
+              <MetricSkeleton type="users" size="md" />
+            ) : metricsError ? (
+              <span className="text-red-500 text-sm">Error</span>
+            ) : (
+              metrics?.activeUsers || 0
+            )}
+          </div>
           <div className="text-sm text-gray-600">Oyentes Activos</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600 mb-1">$45,230</div>
+          <div className="text-2xl font-bold text-orange-600 mb-1">
+            {metricsLoading ? (
+              <MetricSkeleton type="currency" size="lg" />
+            ) : metricsError ? (
+              <span className="text-red-500 text-sm">Error</span>
+            ) : (
+              `$${metrics?.dineroTotalRecaudado || 0}`
+            )}
+          </div>
           <div className="text-sm text-gray-600">Fondos Recaudados</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600 mb-1">17</div>
+          <div className="text-2xl font-bold text-orange-600 mb-1">
+            {metricsLoading ? (
+              <MetricSkeleton variant="radio" size="md" />
+            ) : (
+              "17"
+            )}
+          </div>
           <div className="text-sm text-gray-600">Semanas Restantes</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600 mb-1">4</div>
+          <div className="text-2xl font-bold text-orange-600 mb-1">
+            {metricsLoading ? (
+              <MetricSkeleton type="activity" size="md" />
+            ) : metricsError ? (
+              <span className="text-red-500 text-sm">Error</span>
+            ) : (
+              metrics?.activeProposals || 0
+            )}
+          </div>
           <div className="text-sm text-gray-600">Propuestas Activas</div>
         </CardContent>
       </Card>

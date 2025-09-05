@@ -22,10 +22,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagarConMercadoPago, pagarConPayPal } from './actions';
-import { useMetrics } from '@/lib/hooks/useMetrics';
 
 export default function ParticipacionPage() {
-  const { metrics, loading: metricsLoading } = useMetrics();
   const [step, setStep] = useState<'form' | 'payment'>('form');
   const [isPending, startTransition] = useTransition();
   const [processingMethod, setProcessingMethod] = useState<'mercadopago' | 'paypal' | null>(null);
@@ -351,13 +349,7 @@ export default function ParticipacionPage() {
           <div className="mt-8 border-t border-gray-200 pt-8">
             <div className="grid grid-cols-3 gap-6 max-w-md mx-auto text-center">
               <div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {metricsLoading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded mx-auto"></div>
-                  ) : (
-                    metrics?.activeUsers || 0
-                  )}
-                </div>
+                <div className="text-2xl font-bold text-orange-600">127</div>
                 <div className="text-xs text-gray-500">Miembros</div>
               </div>
               <div>
@@ -365,14 +357,8 @@ export default function ParticipacionPage() {
                 <div className="text-xs text-gray-500">Semanas</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {metricsLoading ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-16 rounded mx-auto"></div>
-                  ) : (
-                    `$${metrics?.dineroTotalRecaudado || 0}`
-                  )}
-                </div>
-                <div className="text-xs text-gray-500">Fondos Recaudados</div>
+                <div className="text-2xl font-bold text-orange-600">$42K</div>
+                <div className="text-xs text-gray-500">Fondos</div>
               </div>
             </div>
           </div>

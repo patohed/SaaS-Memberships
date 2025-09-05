@@ -1,8 +1,3 @@
-'use client';
-
-import Link from 'next/link';
-import { useMetrics } from '@/lib/hooks/useMetrics';
-import { MinimalMetrics } from '@/components/ui/minimal-metrics';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -23,10 +18,9 @@ import {
   Headphones,
   LogIn
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
-  const { metrics, loading, error, isRefreshing, showSuccess, refreshMetrics } = useMetrics();
-  
   return (
     <main className="min-h-screen">
       {/* Hero Section Minimalista - Estilo buenastardeschina.com.ar */}
@@ -75,16 +69,22 @@ export default function HomePage() {
           </div>
 
           {/* Estadísticas minimalistas */}
-          <MinimalMetrics 
-            metrics={metrics ? {
-              totalUsers: metrics.activeUsers || 0,
-              dineroTotalRecaudado: metrics.dineroTotalRecaudado || 0,
-              weeksRemaining: 18
-            } : null}
-            loading={loading}
-            error={error}
-            onRefresh={refreshMetrics}
-          />
+          <div className="border-t border-gray-200 pt-8">
+            <div className="grid grid-cols-3 gap-6 max-w-md mx-auto">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">127</div>
+                <div className="text-xs text-gray-500">Miembros</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">18</div>
+                <div className="text-xs text-gray-500">Semanas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">$42K</div>
+                <div className="text-xs text-gray-500">Fondos</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -126,13 +126,7 @@ export default function HomePage() {
             Comenzá tu membresía
           </h2>
           <p className="text-lg text-orange-100 mb-8">
-            {loading ? (
-              'Cargando datos de la comunidad...'
-            ) : error ? (
-              'Únete a nuestra comunidad activa'
-            ) : (
-              `Únete a los ${metrics?.activeUsers || 0} miembros activos`
-            )}
+            Únete a los 127 miembros activos
           </p>
           
           <Link href="/participacion">

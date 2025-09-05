@@ -1,20 +1,45 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { signToken, verifyToken } from '@/lib/auth/session';
+import { applySecurityHeaders, generalLimiter, authLimiter, getRateLimitHeaders } from '@/lib/security/headers';
+import { secureLog } from '@/lib/utils/secure-logger';
 
 const protectedRoutes = '/dashboard';
+const authRoutes = ['/sign-in', '/sign-up', '/participacion'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+  
+  // Obtener IP para rate limiting
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
+  
+  // Aplicar rate limiting
+  const limiter = isAuthRoute ? authLimiter : generalLimiter;
+  const rateLimitResult = limiter.check(ip);
+  
+  if (!rateLimitResult.allowed) {
+    const response = new NextResponse('Too Many Requests', { status: 429 });
+    
+    // Aplicar headers de rate limit
+    Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
+      .forEach(([key, value]) => response.headers.set(key, value));
+    
+    return applySecurityHeaders(response);
+  }
 
+  // Verificar autenticación
   if (isProtectedRoute && !sessionCookie) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    const response = NextResponse.redirect(new URL('/sign-in', request.url));
+    return applySecurityHeaders(response);
   }
 
   let res = NextResponse.next();
 
+  // Renovar sesión si existe
   if (sessionCookie && request.method === 'GET') {
     try {
       const parsed = await verifyToken(sessionCookie.value);
@@ -27,20 +52,29 @@ export async function middleware(request: NextRequest) {
           expires: expiresInOneDay.toISOString()
         }),
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         expires: expiresInOneDay
       });
     } catch (error) {
-      console.error('Error updating session:', error);
+      // Solo logear en desarrollo
+      if (process.env.NODE_ENV === 'development') {
+        secureLog.error('Error interno', error);
+      }
       res.cookies.delete('session');
       if (isProtectedRoute) {
-        return NextResponse.redirect(new URL('/sign-in', request.url));
+        const response = NextResponse.redirect(new URL('/sign-in', request.url));
+        return applySecurityHeaders(response);
       }
     }
   }
 
-  return res;
+  // Aplicar headers de rate limiting
+  Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
+    .forEach(([key, value]) => res.headers.set(key, value));
+
+  // Aplicar headers de seguridad
+  return applySecurityHeaders(res);
 }
 
 export const config = {

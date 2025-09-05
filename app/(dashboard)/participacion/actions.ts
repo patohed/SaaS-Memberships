@@ -6,6 +6,8 @@ import { users, membershipPayments, type NewUser } from '@/lib/db/schema';
 import { hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
+import { invalidateCacheOnPayment } from '@/lib/cache/metrics-cache';
+import { secureLog } from '@/lib/utils/secure-logger';
 
 // Esquema para los datos de participación
 const participacionSchema = z.object({
@@ -18,7 +20,7 @@ const participacionSchema = z.object({
 });
 
 export async function procesarPagoSimulado(formData: FormData) {
-  console.log('🚀 Iniciando procesarPagoSimulado');
+  secureLog.payment('Iniciando procesamiento de pago');
   
   try {
     // Extraer datos del formulario
@@ -31,24 +33,24 @@ export async function procesarPagoSimulado(formData: FormData) {
       metodoPago: formData.get('metodoPago') as string
     };
 
-    console.log('📝 Datos recibidos:', data);
+    secureLog.debug('Datos recibidos', data);
 
     // Validar que todos los campos estén presentes
     if (!data.nombre || !data.apellido || !data.email || !data.telefono || !data.codigoPais || !data.metodoPago) {
-      console.log('❌ Datos faltantes');
+      secureLog.warn('Error en validación');
       redirect('/participacion/error?reason=datos-incompletos');
     }
 
     // Validar datos con Zod
     const validatedData = participacionSchema.parse(data);
-    console.log('✅ Datos validados correctamente');
+    secureLog.info('Operación exitosa');
 
     // Simular delay de procesamiento de pago
-    console.log('⏳ Simulando procesamiento de pago...');
+    secureLog.debug('Procesando operación');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Verificar si el usuario ya existe (por email)
-    console.log('🔍 Verificando usuario existente por email...');
+    secureLog.debug('Verificando datos');
     const existingUser = await db
       .select()
       .from(users)
@@ -61,10 +63,10 @@ export async function procesarPagoSimulado(formData: FormData) {
     }
 
     // Generar contraseña temporal
-    console.log('🔐 Generando contraseña temporal...');
+    secureLog.auth('Generando credenciales');
     const tempPassword = Math.random().toString(36).slice(-8);
     const passwordHash = await hashPassword(tempPassword);
-    console.log('✅ Contraseña hasheada');
+    secureLog.info('Operación exitosa');
 
     // Crear nuevo usuario con datos completos
     const newUser: NewUser = {
@@ -86,41 +88,41 @@ export async function procesarPagoSimulado(formData: FormData) {
       province: null
     };
 
-    console.log('👤 Creando usuario en BD...');
+    secureLog.info('Creando usuario');
     let createdUser;
     
     try {
       const result = await db.insert(users).values(newUser).returning();
       createdUser = result[0];
     } catch (dbError: any) {
-      console.error('💥 Error de base de datos:', dbError);
+      secureLog.error('Error en operación', dbError);
       
       // Manejar error de email duplicado específicamente
       if (dbError.code === '23505' && dbError.constraint === 'users_email_unique') {
-        console.log('❌ Email duplicado detectado en BD');
+        secureLog.warn('Error en validación');
         redirect('/participacion/error?reason=email-existente');
       }
       
       // Manejar otros errores de constrains
       if (dbError.code === '23505') {
-        console.log('❌ Violación de restricción única');
+        secureLog.warn('Error en validación');
         redirect('/participacion/error?reason=datos-duplicados');
       }
       
       // Error general de base de datos
-      console.log('❌ Error general de base de datos');
+      secureLog.warn('Error en validación');
       redirect('/participacion/error?reason=error-base-datos');
     }
 
     if (!createdUser) {
-      console.log('❌ Error al crear usuario - resultado vacío');
+      secureLog.warn('Error en validación');
       redirect('/participacion/error?reason=error-creacion');
     }
 
     console.log('✅ Usuario creado:', createdUser.id);
 
     // Crear registro de pago de membresía ($18)
-    console.log('💳 Creando registro de pago...');
+    secureLog.payment('Procesando pago');
     try {
       const paymentData = {
         userId: createdUser.id,
@@ -131,32 +133,35 @@ export async function procesarPagoSimulado(formData: FormData) {
       };
       
       await db.insert(membershipPayments).values(paymentData);
-      console.log('✅ Registro de pago creado');
+      secureLog.info('Operación exitosa');
+      
+      // Invalidar cache de métricas para reflejar el nuevo pago
+      await invalidateCacheOnPayment();
     } catch (paymentError) {
-      console.error('⚠️ Error al crear registro de pago:', paymentError);
+      secureLog.warn('Advertencia en operación', paymentError);
       // Continuamos sin registro de pago, el usuario ya fue creado
     }
 
     // Establecer sesión automáticamente
-    console.log('🔑 Estableciendo sesión...');
+    secureLog.auth('Estableciendo sesión');
     try {
       await setSession(createdUser);
-      console.log('✅ Sesión establecida');
+      secureLog.info('Operación exitosa');
     } catch (sessionError) {
-      console.error('⚠️ Error al establecer sesión:', sessionError);
+      secureLog.warn('Advertencia en operación', sessionError);
       // Continuamos sin sesión, el usuario puede hacer login manual
     }
 
     // Redirigir a página de éxito con datos del usuario
-    console.log('🎉 Redirigiendo a página de éxito...');
+    secureLog.info('Operación completada');
     redirect(`/participacion/exito?nombre=${encodeURIComponent(validatedData.nombre)}&apellido=${encodeURIComponent(validatedData.apellido)}&email=${encodeURIComponent(validatedData.email)}&password=${tempPassword}&metodo=${validatedData.metodoPago}`);
 
   } catch (error: any) {
-    console.error('💥 Error en procesarPagoSimulado:', error);
+    secureLog.error('Error en operación', error);
     
     // Manejar errores específicos de validación Zod
     if (error.name === 'ZodError') {
-      console.log('❌ Error de validación de datos');
+      secureLog.warn('Error en validación');
       redirect('/participacion/error?reason=datos-invalidos');
     }
     
