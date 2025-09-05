@@ -77,7 +77,13 @@ export default function ParticipacionPage() {
         userData.telefono,
         userData.codigoPais
       );
-    } catch (error) {
+    } catch (error: any) {
+      // Los redirects de Next.js lanzan una excepción especial, no es un error real
+      if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+        console.log('✅ Redirect exitoso a página de resultados');
+        return; // No es un error, es un redirect exitoso
+      }
+      
       console.error('Error en pago MercadoPago:', error);
       setProcessingMethod(null);
       setIsProcessingPayment(false);
@@ -97,7 +103,13 @@ export default function ParticipacionPage() {
         userData.telefono,
         userData.codigoPais
       );
-    } catch (error) {
+    } catch (error: any) {
+      // Los redirects de Next.js lanzan una excepción especial, no es un error real
+      if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+        console.log('✅ Redirect exitoso a página de resultados');
+        return; // No es un error, es un redirect exitoso
+      }
+      
       console.error('Error en pago PayPal:', error);
       setProcessingMethod(null);
       setIsProcessingPayment(false);
