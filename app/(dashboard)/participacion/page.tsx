@@ -27,7 +27,7 @@ import { useMetrics } from '@/lib/hooks/useMetrics';
 export default function ParticipacionPage() {
   const { metrics, loading: metricsLoading } = useMetrics();
   const [step, setStep] = useState<'form' | 'payment'>('form');
-  const [isPending, startTransition] = useTransition();
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [processingMethod, setProcessingMethod] = useState<'mercadopago' | 'paypal' | null>(null);
   const [userData, setUserData] = useState({
     nombre: '',
@@ -64,9 +64,12 @@ export default function ParticipacionPage() {
     setStep('payment');
   };
 
-  const handlePagoMercadoPago = () => {
+  const handlePagoMercadoPago = async () => {
     setProcessingMethod('mercadopago');
-    startTransition(async () => {
+    setIsProcessingPayment(true);
+    
+    try {
+      // No usar startTransition para permitir redirects
       await pagarConMercadoPago(
         userData.nombre,
         userData.apellido,
@@ -74,12 +77,19 @@ export default function ParticipacionPage() {
         userData.telefono,
         userData.codigoPais
       );
-    });
+    } catch (error) {
+      console.error('Error en pago MercadoPago:', error);
+      setProcessingMethod(null);
+      setIsProcessingPayment(false);
+    }
   };
 
-  const handlePagoPayPal = () => {
+  const handlePagoPayPal = async () => {
     setProcessingMethod('paypal');
-    startTransition(async () => {
+    setIsProcessingPayment(true);
+    
+    try {
+      // No usar startTransition para permitir redirects
       await pagarConPayPal(
         userData.nombre,
         userData.apellido,
@@ -87,7 +97,11 @@ export default function ParticipacionPage() {
         userData.telefono,
         userData.codigoPais
       );
-    });
+    } catch (error) {
+      console.error('Error en pago PayPal:', error);
+      setProcessingMethod(null);
+      setIsProcessingPayment(false);
+    }
   };
 
   const handleBackToForm = () => {
@@ -121,10 +135,10 @@ export default function ParticipacionPage() {
                 <div className="space-y-4">
                   <Button
                     onClick={handlePagoMercadoPago}
-                    disabled={isPending}
+                    disabled={isProcessingPayment}
                     className="w-full flex justify-center items-center py-4 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50"
                   >
-                    {processingMethod === 'mercadopago' && isPending ? (
+                    {processingMethod === 'mercadopago' && isProcessingPayment ? (
                       <>
                         <Loader2 className="animate-spin mr-2 h-5 w-5" />
                         Procesando...
@@ -139,10 +153,10 @@ export default function ParticipacionPage() {
 
                   <Button
                     onClick={handlePagoPayPal}
-                    disabled={isPending}
+                    disabled={isProcessingPayment}
                     className="w-full flex justify-center items-center py-4 px-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50"
                   >
-                    {processingMethod === 'paypal' && isPending ? (
+                    {processingMethod === 'paypal' && isProcessingPayment ? (
                       <>
                         <Loader2 className="animate-spin mr-2 h-5 w-5" />
                         Procesando...

@@ -183,15 +183,36 @@ export async function pagarConMercadoPago(
   telefono: string,
   codigoPais: string
 ) {
-  const formData = new FormData();
-  formData.set('nombre', nombre);
-  formData.set('apellido', apellido);
-  formData.set('email', email);
-  formData.set('telefono', telefono);
-  formData.set('codigoPais', codigoPais);
-  formData.set('metodoPago', 'mercadopago');
+  secureLog.payment('Iniciando pago con MercadoPago');
+  
+  try {
+    // Simular procesamiento de MercadoPago (2-3 segundos)
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    
+    // Simular respuesta exitosa de MercadoPago
+    const simulatedResponse = {
+      status: 'approved',
+      payment_id: `mp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      payment_method: 'mercadopago'
+    };
+    
+    secureLog.payment('Pago MercadoPago simulado exitoso', { payment_id: simulatedResponse.payment_id });
+    
+    // Procesar el pago internamente
+    const formData = new FormData();
+    formData.set('nombre', nombre);
+    formData.set('apellido', apellido);
+    formData.set('email', email);
+    formData.set('telefono', telefono);
+    formData.set('codigoPais', codigoPais);
+    formData.set('metodoPago', 'mercadopago');
 
-  return procesarPagoSimulado(formData);
+    return procesarPagoSimulado(formData);
+    
+  } catch (error) {
+    secureLog.error('Error en pago MercadoPago', error);
+    redirect('/participacion/error?reason=error-mercadopago');
+  }
 }
 
 // Action específica para PayPal
@@ -202,13 +223,34 @@ export async function pagarConPayPal(
   telefono: string,
   codigoPais: string
 ) {
-  const formData = new FormData();
-  formData.set('nombre', nombre);
-  formData.set('apellido', apellido);
-  formData.set('email', email);
-  formData.set('telefono', telefono);
-  formData.set('codigoPais', codigoPais);
-  formData.set('metodoPago', 'paypal');
+  secureLog.payment('Iniciando pago con PayPal');
+  
+  try {
+    // Simular procesamiento de PayPal (3-4 segundos)
+    await new Promise(resolve => setTimeout(resolve, 3500));
+    
+    // Simular respuesta exitosa de PayPal
+    const simulatedResponse = {
+      status: 'COMPLETED',
+      payment_id: `pp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      payment_method: 'paypal'
+    };
+    
+    secureLog.payment('Pago PayPal simulado exitoso', { payment_id: simulatedResponse.payment_id });
+    
+    // Procesar el pago internamente
+    const formData = new FormData();
+    formData.set('nombre', nombre);
+    formData.set('apellido', apellido);
+    formData.set('email', email);
+    formData.set('telefono', telefono);
+    formData.set('codigoPais', codigoPais);
+    formData.set('metodoPago', 'paypal');
 
-  return procesarPagoSimulado(formData);
+    return procesarPagoSimulado(formData);
+    
+  } catch (error) {
+    secureLog.error('Error en pago PayPal', error);
+    redirect('/participacion/error?reason=error-paypal');
+  }
 }
