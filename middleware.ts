@@ -6,29 +6,35 @@ import { secureLog } from '@/lib/utils/secure-logger';
 
 const protectedRoutes = '/dashboard';
 const authRoutes = ['/sign-in', '/sign-up', '/participacion'];
+const apiRoutesWithOwnRateLimit = ['/api/metrics']; // Rutas que manejan su propio rate limiting
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+  const hasOwnRateLimit = apiRoutesWithOwnRateLimit.some(route => pathname.startsWith(route));
   
   // Obtener IP para rate limiting
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
   
-  // Aplicar rate limiting
-  const limiter = isAuthRoute ? authLimiter : generalLimiter;
-  const rateLimitResult = limiter.check(ip);
+  let rateLimitResult: any = null;
   
-  if (!rateLimitResult.allowed) {
-    const response = new NextResponse('Too Many Requests', { status: 429 });
+  // Aplicar rate limiting solo si la ruta no maneja el suyo propio
+  if (!hasOwnRateLimit) {
+    const limiter = isAuthRoute ? authLimiter : generalLimiter;
+    rateLimitResult = limiter.check(ip);
     
-    // Aplicar headers de rate limit
-    Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
-      .forEach(([key, value]) => response.headers.set(key, value));
-    
-    return applySecurityHeaders(response);
+    if (!rateLimitResult.allowed) {
+      const response = new NextResponse('Too Many Requests', { status: 429 });
+      
+      // Aplicar headers de rate limit
+      Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
+        .forEach(([key, value]) => response.headers.set(key, value));
+      
+      return applySecurityHeaders(response);
+    }
   }
 
   // Verificar autenticación
@@ -69,9 +75,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Aplicar headers de rate limiting
-  Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
-    .forEach(([key, value]) => res.headers.set(key, value));
+  // Aplicar headers de rate limiting solo si se aplicó rate limiting
+  if (rateLimitResult && !hasOwnRateLimit) {
+    Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
+      .forEach(([key, value]) => res.headers.set(key, value));
+  }
 
   // Aplicar headers de seguridad
   return applySecurityHeaders(res);

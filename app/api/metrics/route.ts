@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMetrics } from '@/lib/db/queries';
 import { getCachedMetrics, setCachedMetrics } from '@/lib/cache/metrics-cache';
 import { secureLog } from '@/lib/utils/secure-logger';
-import { generalLimiter, getRateLimitHeaders } from '@/lib/security/headers';
+import { metricsLimiter, getRateLimitHeaders } from '@/lib/security/headers';
 
 export async function GET(request: NextRequest) {
-  // Rate limiting
+  // Rate limiting específico para métricas (más permisivo)
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
   
-  const rateLimitResult = generalLimiter.check(ip);
+  const rateLimitResult = metricsLimiter.check(ip);
   
   if (!rateLimitResult.allowed) {
     secureLog.security('Rate limit excedido para métricas', { ip });

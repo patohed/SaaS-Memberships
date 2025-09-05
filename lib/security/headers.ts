@@ -119,6 +119,7 @@ class RateLimiter {
 export const generalLimiter = new RateLimiter(100, 15 * 60 * 1000); // 100/15min general
 export const authLimiter = new RateLimiter(5, 15 * 60 * 1000);      // 5/15min auth
 export const paymentLimiter = new RateLimiter(10, 60 * 60 * 1000);  // 10/hour payments
+export const metricsLimiter = new RateLimiter(200, 15 * 60 * 1000); // 200/15min métricas (más permisivo)
 
 export function getRateLimitHeaders(remaining: number, resetTime: number) {
   return {
