@@ -138,14 +138,39 @@ export async function procesarPagoSimulado(formData: FormData) {
       // Invalidar cache de métricas para reflejar el nuevo pago
       await invalidateCacheOnPayment();
       
-      // En producción, también actualizar las métricas agregadas
-      if (process.env.VERCEL_URL) {
-        try {
-          const baseUrl = `https://${process.env.VERCEL_URL}`;
-          await fetch(`${baseUrl}/api/update-aggregates`, { method: 'POST' });
-        } catch (updateError) {
-          console.warn('No se pudieron actualizar métricas agregadas:', updateError);
+      // Actualizar las métricas agregadas (tanto local como producción)
+      try {
+        let baseUrl = '';
+        
+        if (process.env.VERCEL_URL) {
+          // En Vercel
+          baseUrl = `https://${process.env.VERCEL_URL}`;
+        } else if (process.env.NODE_ENV === 'development') {
+          // En desarrollo local
+          baseUrl = 'http://localhost:3000'; // Puerto por defecto
+        } else {
+          // Fallback - intentar con URL actual
+          baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
         }
+        
+        console.log(`🔄 Actualizando métricas agregadas en: ${baseUrl}/api/update-aggregates`);
+        
+        const response = await fetch(`${baseUrl}/api/update-aggregates`, { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          console.log('✅ Métricas agregadas actualizadas exitosamente');
+        } else {
+          console.warn(`⚠️ Error al actualizar métricas: ${response.status} ${response.statusText}`);
+        }
+        
+      } catch (updateError) {
+        console.warn('⚠️ No se pudieron actualizar métricas agregadas:', updateError);
+        // No fallar el registro por esto
       }
     } catch (paymentError) {
       secureLog.warn('Advertencia en operación', paymentError);
