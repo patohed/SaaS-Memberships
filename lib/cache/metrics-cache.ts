@@ -7,8 +7,8 @@ let metricsCache: {
   ttl: number;
 } | null = null;
 
-// TTL: 5 minutos para datos que no cambian constantemente
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutos en ms
+// TTL: 2 minutos para mejor responsividad en producción
+const CACHE_TTL = 2 * 60 * 1000; // 2 minutos en ms
 
 export function isCacheValid(): boolean {
   if (!metricsCache) return false;
@@ -38,10 +38,20 @@ export function setCachedMetrics(data: any) {
 
 export function invalidateCache() {
   metricsCache = null;
+  console.log('🗑️ Cache de métricas invalidado manualmente');
 }
 
 // Hook para invalidar cache cuando hay nuevas transacciones
 export function invalidateCacheOnPayment() {
   // Llamar esta función después de pagos completados
   invalidateCache();
+  console.log('💳 Cache invalidado por nuevo pago/registro');
+}
+
+// Función para forzar invalidación en caso de problemas
+export function forceRefreshMetrics() {
+  invalidateCache();
+  // En caso de usar con fetch, podríamos agregar cache-busting
+  const timestamp = Date.now();
+  return timestamp;
 }

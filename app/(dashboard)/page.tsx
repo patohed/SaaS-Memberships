@@ -37,10 +37,10 @@ export default function HomePage() {
     isTabVisible 
   } = useMetrics({
     autoRefresh: true,
-    refreshInterval: 5 * 60 * 1000, // 5 minutos (mucho más conservador)
-    pauseOnHidden: true, // Pausar cuando la pestaña no es visible
-    maxRetries: 2,
-    minInterval: 30 * 1000 // Mínimo 30 segundos entre requests
+    refreshInterval: 2 * 60 * 1000, // 2 minutos para producción
+    pauseOnHidden: false, // NO pausar en producción para mejor UX
+    maxRetries: 3,
+    minInterval: 15 * 1000 // Mínimo 15 segundos entre requests
   });
   
   return (

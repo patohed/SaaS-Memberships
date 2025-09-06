@@ -39,8 +39,8 @@ interface UseMetricsOptions {
 export function useMetrics(options: UseMetricsOptions = {}) {
   const {
     autoRefresh = true,
-    refreshInterval = 2 * 60 * 1000, // 2 minutos por defecto (más conservador que 30s)
-    pauseOnHidden = true,
+    refreshInterval = 2 * 60 * 1000, // 2 minutos por defecto
+    pauseOnHidden = false, // Cambiar por defecto para mejor UX en producción
     maxRetries = 3,
     minInterval = 10 * 1000 // 10 segundos mínimo entre requests
   } = options;

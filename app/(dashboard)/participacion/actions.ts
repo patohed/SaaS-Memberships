@@ -62,9 +62,9 @@ export async function procesarPagoSimulado(formData: FormData) {
       redirect('/participacion/error?reason=email-existente');
     }
 
-    // Generar contraseña temporal
+    // Generar contraseña temporal más segura (10 caracteres)
     secureLog.auth('Generando credenciales');
-    const tempPassword = Math.random().toString(36).slice(-8);
+    const tempPassword = Math.random().toString(36).slice(-5) + Math.random().toString(36).slice(-5); // 10 chars
     const passwordHash = await hashPassword(tempPassword);
     secureLog.info('Operación exitosa');
 
@@ -137,6 +137,16 @@ export async function procesarPagoSimulado(formData: FormData) {
       
       // Invalidar cache de métricas para reflejar el nuevo pago
       await invalidateCacheOnPayment();
+      
+      // En producción, también actualizar las métricas agregadas
+      if (process.env.VERCEL_URL) {
+        try {
+          const baseUrl = `https://${process.env.VERCEL_URL}`;
+          await fetch(`${baseUrl}/api/update-aggregates`, { method: 'POST' });
+        } catch (updateError) {
+          console.warn('No se pudieron actualizar métricas agregadas:', updateError);
+        }
+      }
     } catch (paymentError) {
       secureLog.warn('Advertencia en operación', paymentError);
       // Continuamos sin registro de pago, el usuario ya fue creado

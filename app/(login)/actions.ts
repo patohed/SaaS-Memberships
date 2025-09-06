@@ -19,7 +19,7 @@ import {
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
-  password: z.string().min(8).max(100)
+  password: z.string().min(6).max(100) // Reducir a 6 para compatibilidad con contraseñas temporales
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {

@@ -22,10 +22,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { pagarConMercadoPago, pagarConPayPal } from './actions';
-import { useMetrics } from '@/lib/hooks/useMetrics';
+import { useMetrics } from '@/lib/hooks/useMetrics-optimized';
 
 export default function ParticipacionPage() {
-  const { metrics, loading: metricsLoading } = useMetrics();
+  const { metrics, loading: metricsLoading } = useMetrics({
+    refreshInterval: 2 * 60 * 1000, // 2 minutos
+    pauseOnHidden: false // No pausar en Vercel
+  });
   const [step, setStep] = useState<'form' | 'payment'>('form');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [processingMethod, setProcessingMethod] = useState<'mercadopago' | 'paypal' | null>(null);

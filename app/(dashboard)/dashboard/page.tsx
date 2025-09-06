@@ -30,7 +30,9 @@ import { useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useRouter } from 'next/navigation';
 import { signOut } from '@/app/(login)/actions';
-import { useMetrics } from '@/lib/hooks/useMetrics';
+import { useMetrics } from '@/lib/hooks/useMetrics-optimized';
+
+// Más imports...
 import { MetricSkeleton, CommunityLoading } from '@/components/ui/loading-animations';
 
 // Tipo para el usuario con información adicional
@@ -135,7 +137,10 @@ function UserHeader() {
 // Componente de estadísticas generales
 function CommunityStats() {
   const { data: user } = useSWR<UserType>('/api/user', fetcher);
-  const { metrics, loading: metricsLoading, error: metricsError } = useMetrics();
+  const { metrics, loading: metricsLoading, error: metricsError } = useMetrics({
+    refreshInterval: 2 * 60 * 1000, // 2 minutos
+    pauseOnHidden: false // No pausar en Vercel
+  });
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">

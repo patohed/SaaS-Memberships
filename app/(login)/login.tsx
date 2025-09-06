@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
-import { useMetrics } from '@/lib/hooks/useMetrics';
+import { useMetrics } from '@/lib/hooks/useMetrics-optimized';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +29,11 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
-  const { metrics, loading: metricsLoading } = useMetrics();
+  // Usar hook estático para login (sin auto-refresh)
+  const { metrics, loading: metricsLoading } = useMetrics({
+    autoRefresh: false, // No auto-refresh en login
+    pauseOnHidden: false
+  });
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     signIn, // Siempre usar signIn ahora
     { error: '' }
@@ -121,7 +125,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   }
                   defaultValue={state.password}
                   required
-                  minLength={8}
+                  minLength={6}
                   maxLength={100}
                   className="pr-12 appearance-none rounded-lg relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 sm:text-sm h-12"
                   placeholder="Ingresá tu contraseña"
