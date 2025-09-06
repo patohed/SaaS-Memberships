@@ -33,7 +33,6 @@ export default function HomePage() {
     isRefreshing, 
     showSuccess, 
     refreshMetrics,
-    lastFetchTime,
     isTabVisible 
   } = useMetrics({
     autoRefresh: true,
