@@ -52,7 +52,7 @@ export interface UserRegistrationResult {
 // Servicios de dominio
 export interface PasswordService {
   hash(password: string): Promise<string>;
-  generateTemporary(): string;
+  // generateTemporary() eliminada - ahora usamos el email como contraseña temporal
 }
 
 export interface SessionService {
@@ -86,8 +86,8 @@ export class RegisterUserAndProcessPaymentUseCase {
       );
     }
 
-    // 2. Generar contraseña temporal
-    const temporaryPassword = this.passwordService.generateTemporary();
+    // 2. Usar email como contraseña temporal (más simple)
+    const temporaryPassword = dto.email; // Email como contraseña
     const passwordHash = await this.passwordService.hash(temporaryPassword);
 
     // 3. Crear entidad de usuario

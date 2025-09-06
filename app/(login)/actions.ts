@@ -12,6 +12,7 @@ import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getUser } from '@/lib/db/queries';
+import { invalidateCacheOnPayment } from '@/lib/cache/metrics-cache';
 import {
   validatedAction,
   validatedActionWithUser
@@ -110,6 +111,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
+  // Invalidar cache de métricas después de crear usuario
+  await invalidateCacheOnPayment();
+
   await setSession(createdUser);
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -198,6 +202,9 @@ export const deleteAccount = validatedActionWithUser(
         email: `deleted-${user.id}-${Date.now()}@example.com`
       })
       .where(eq(users.id, user.id));
+
+    // Invalidar cache de métricas después de eliminar usuario
+    await invalidateCacheOnPayment();
 
     (await cookies()).delete('session');
     redirect('/sign-in');

@@ -1,46 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { updateMetricsAggregates } from '@/lib/services/metrics-updater';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 [FORCE UPDATE] Forzando actualización de métricas agregadas...');
     
-    // Construir URL base
-    let baseUrl = '';
-    const host = request.headers.get('host');
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
+    // Llamar directamente a la función en lugar de hacer HTTP request
+    const result = await updateMetricsAggregates();
     
-    if (host) {
-      baseUrl = `${protocol}://${host}`;
-    } else if (process.env.VERCEL_URL) {
-      baseUrl = `https://${process.env.VERCEL_URL}`;
-    } else {
-      baseUrl = 'http://localhost:3000';
-    }
+    console.log('✅ [FORCE UPDATE] Métricas actualizadas exitosamente');
     
-    console.log(`📡 [FORCE UPDATE] Llamando a: ${baseUrl}/api/update-aggregates`);
-    
-    // Llamar al endpoint de actualización
-    const response = await fetch(`${baseUrl}/api/update-aggregates`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    return NextResponse.json({
+      success: true,
+      message: 'Métricas forzadas a actualizar exitosamente',
+      data: result,
+      timestamp: new Date().toISOString()
     });
-    
-    const result = await response.json();
-    
-    if (response.ok) {
-      console.log('✅ [FORCE UPDATE] Métricas actualizadas exitosamente');
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Métricas forzadas a actualizar exitosamente',
-        data: result.data,
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      throw new Error(`HTTP ${response.status}: ${result.error || 'Unknown error'}`);
-    }
     
   } catch (error) {
     console.error('❌ [FORCE UPDATE] Error:', error);

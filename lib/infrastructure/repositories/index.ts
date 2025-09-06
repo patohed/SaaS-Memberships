@@ -9,6 +9,7 @@ import {
   users, 
   membershipPayments
 } from '../../db/schema';
+import { invalidateCacheOnPayment } from '../../cache/metrics-cache';
 import { 
   User, 
   Email, 
@@ -37,6 +38,9 @@ export class DrizzleUserRepository implements UserRepository {
       .insert(users)
       .values(userData)
       .returning();
+
+    // Invalidar cache de métricas después de crear usuario
+    await invalidateCacheOnPayment();
 
     return User.fromPersistence({
       id: insertedUser.id,
@@ -137,6 +141,9 @@ export class DrizzlePaymentRepository implements PaymentRepository {
       .insert(membershipPayments)
       .values(paymentData)
       .returning();
+
+    // Invalidar cache de métricas después de crear pago
+    await invalidateCacheOnPayment();
 
     return MembershipPayment.restore({
       id: insertedPayment.id,

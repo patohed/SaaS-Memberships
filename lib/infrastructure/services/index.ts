@@ -17,15 +17,7 @@ export class MockPasswordService implements PasswordService {
     return `hashed_${password}_${Date.now()}`;
   }
 
-  generateTemporary(): string {
-    // Generar contraseña temporal de 8 caracteres
-    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let password = '';
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
-  }
+  // Función generateTemporary() eliminada - ahora usamos el email como contraseña temporal
 
   async verify(password: string, hash: string): Promise<boolean> {
     // Implementación simulada
