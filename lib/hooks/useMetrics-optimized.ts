@@ -54,23 +54,9 @@ export function useMetrics(options: UseMetricsOptions = {}) {
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isTabVisible = useRef(true);
-  const lastFetchTime = useRef<number>(0);
   const fetchAbortController = useRef<AbortController | null>(null);
 
   const fetchMetrics = useCallback(async (isRefresh = false, force = false) => {
-    // Evitar fetch duplicados
-    const now = Date.now();
-    if (!force && now - lastFetchTime.current < minInterval) {
-      secureLog.info('Fetch metrics bloqueado - muy pronto desde el último request');
-      return;
-    }
-
-    // Si la pestaña no es visible y no es un refresh manual, no hacer fetch
-    if (pauseOnHidden && !isTabVisible.current && !isRefresh) {
-      secureLog.info('Fetch metrics omitido - pestaña no visible');
-      return;
-    }
-
     // Cancelar request anterior si existe
     if (fetchAbortController.current) {
       fetchAbortController.current.abort();
@@ -85,7 +71,6 @@ export function useMetrics(options: UseMetricsOptions = {}) {
         setLoading(true);
       }
       setError(null);
-      lastFetchTime.current = now;
 
       const response = await fetch('/api/metrics', {
         method: 'GET',
@@ -152,14 +137,10 @@ export function useMetrics(options: UseMetricsOptions = {}) {
       
       secureLog.info(`Pestaña ${isTabVisible.current ? 'visible' : 'oculta'}`);
       
-      // Si la pestaña vuelve a ser visible después de estar oculta
-      // y han pasado más de 5 minutos, actualizar métricas
+      // Si la pestaña vuelve a ser visible después de estar oculta, actualizar métricas
       if (!wasVisible && isTabVisible.current) {
-        const timeSinceLastFetch = Date.now() - lastFetchTime.current;
-        if (timeSinceLastFetch > 5 * 60 * 1000) { // 5 minutos
-          secureLog.info('Actualizando métricas - pestaña visible después de 5+ minutos');
-          fetchMetrics(false, true);
-        }
+        secureLog.info('Actualizando métricas - pestaña visible');
+        fetchMetrics(false, true);
       }
     };
 
@@ -199,7 +180,6 @@ export function useMetrics(options: UseMetricsOptions = {}) {
     refreshMetrics,
     retryCount,
     // Información de debugging
-    lastFetchTime: lastFetchTime.current,
     isTabVisible: isTabVisible.current
   };
 }

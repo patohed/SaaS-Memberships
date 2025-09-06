@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMetrics } from '@/lib/db/queries';
 import { getCachedMetrics, setCachedMetrics } from '@/lib/cache/metrics-cache';
 import { secureLog } from '@/lib/utils/secure-logger';
-import { metricsLimiter, getRateLimitHeaders } from '@/lib/security/headers';
+// import { metricsLimiter, getRateLimitHeaders } from '@/lib/security/headers'; // Deshabilitado para desarrollo
 
 export async function GET(request: NextRequest) {
-  // Rate limiting específico para métricas (más permisivo)
+  // Rate limiting DESHABILITADO para desarrollo
+  /*
   const forwarded = request.headers.get('x-forwarded-for');
   const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
   
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
     
     return response;
   }
+  */
 
   try {
     // 1. Intentar obtener datos del cache primero
@@ -38,10 +40,6 @@ export async function GET(request: NextRequest) {
         data: cachedData,
         fromCache: true
       });
-      
-      // Aplicar headers de rate limit
-      Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
-        .forEach(([key, value]) => response.headers.set(key, value));
       
       return response;
     }
@@ -60,10 +58,6 @@ export async function GET(request: NextRequest) {
       }
     });
     
-    // Aplicar headers de rate limit
-    Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
-      .forEach(([key, value]) => response.headers.set(key, value));
-    
     return response;
   } catch (error) {
     secureLog.error('Error interno', error);
@@ -75,10 +69,6 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     );
-    
-    // Aplicar headers de rate limit
-    Object.entries(getRateLimitHeaders(rateLimitResult.remaining, rateLimitResult.resetTime))
-      .forEach(([key, value]) => response.headers.set(key, value));
     
     return response;
   }

@@ -62,9 +62,9 @@ export async function procesarPagoSimulado(formData: FormData) {
       redirect('/participacion/error?reason=email-existente');
     }
 
-    // Generar contraseña temporal más segura (10 caracteres)
+    // Usar email como contraseña temporal (más simple y sin recursos extra)
     secureLog.auth('Generando credenciales');
-    const tempPassword = Math.random().toString(36).slice(-5) + Math.random().toString(36).slice(-5); // 10 chars
+    const tempPassword = validatedData.email.toLowerCase().trim(); // Email como contraseña
     const passwordHash = await hashPassword(tempPassword);
     secureLog.info('Operación exitosa');
 
@@ -138,36 +138,14 @@ export async function procesarPagoSimulado(formData: FormData) {
       // Invalidar cache de métricas para reflejar el nuevo pago
       await invalidateCacheOnPayment();
       
-      // Actualizar las métricas agregadas (tanto local como producción)
+      // Actualizar las métricas agregadas directamente (sin HTTP request)
       try {
-        let baseUrl = '';
+        console.log('🔄 Actualizando métricas agregadas...');
         
-        if (process.env.VERCEL_URL) {
-          // En Vercel
-          baseUrl = `https://${process.env.VERCEL_URL}`;
-        } else if (process.env.NODE_ENV === 'development') {
-          // En desarrollo local
-          baseUrl = 'http://localhost:3000'; // Puerto por defecto
-        } else {
-          // Fallback - intentar con URL actual
-          baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-        }
+        const { updateMetricsAggregates } = await import('@/lib/services/metrics-updater');
+        await updateMetricsAggregates();
         
-        console.log(`🔄 Actualizando métricas agregadas en: ${baseUrl}/api/update-aggregates`);
-        
-        const response = await fetch(`${baseUrl}/api/update-aggregates`, { 
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          console.log('✅ Métricas agregadas actualizadas exitosamente');
-        } else {
-          console.warn(`⚠️ Error al actualizar métricas: ${response.status} ${response.statusText}`);
-        }
-        
+        console.log('✅ Métricas agregadas actualizadas exitosamente');
       } catch (updateError) {
         console.warn('⚠️ No se pudieron actualizar métricas agregadas:', updateError);
         // No fallar el registro por esto
@@ -187,9 +165,9 @@ export async function procesarPagoSimulado(formData: FormData) {
       // Continuamos sin sesión, el usuario puede hacer login manual
     }
 
-    // Redirigir a página de éxito con datos del usuario
+    // Redirigir a página de éxito SIN exponer credenciales en URL (SEGURIDAD)
     secureLog.info('Operación completada');
-    redirect(`/participacion/exito?nombre=${encodeURIComponent(validatedData.nombre)}&apellido=${encodeURIComponent(validatedData.apellido)}&email=${encodeURIComponent(validatedData.email)}&password=${tempPassword}&metodo=${validatedData.metodoPago}`);
+    redirect(`/participacion/exito?nombre=${encodeURIComponent(validatedData.nombre)}&metodo=${validatedData.metodoPago}`);
 
   } catch (error: any) {
     secureLog.error('Error en operación', error);

@@ -14,21 +14,28 @@ import {
   User
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
+import useSWR from 'swr';
+
+// Fetcher para SWR
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function ExitoContent() {
   const searchParams = useSearchParams();
   const nombre = searchParams.get('nombre') || '';
-  const apellido = searchParams.get('apellido') || '';
-  const password = searchParams.get('password') || '';
   const metodo = searchParams.get('metodo') || 'mercadopago';
   
   const [showPassword, setShowPassword] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  // Extraer email de usuario logueado (se puede obtener del contexto en implementación real)
-  const email = searchParams.get('email') || 'usuario@email.com';
+  // SEGURIDAD: Obtener datos del usuario desde sesión activa, NO desde URL
+  const { data: userData, error } = useSWR('/api/user', fetcher);
+  
+  // Solo usar datos seguros - email como contraseña temporal para mostrar
+  const email = userData?.email || '';
+  const apellido = userData?.name?.split(' ').slice(1).join(' ') || '';
+  const tempPassword = email; // Email como contraseña temporal
 
   const copyToClipboard = (text: string, type: 'password' | 'email') => {
     navigator.clipboard.writeText(text);
@@ -137,11 +144,11 @@ function ExitoContent() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Contraseña temporal:
+                        Contraseña temporal (tu email):
                       </label>
                       <div className="flex items-center space-x-2">
                         <div className="flex-1 p-2 bg-gray-50 rounded border text-sm font-mono">
-                          {showPassword ? password : '••••••••'}
+                          {showPassword ? tempPassword : '••••••••'}
                         </div>
                         <Button
                           variant="outline"
@@ -158,7 +165,7 @@ function ExitoContent() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => copyToClipboard(password, 'password')}
+                          onClick={() => copyToClipboard(tempPassword, 'password')}
                           className="px-3"
                         >
                           {copiedPassword ? (

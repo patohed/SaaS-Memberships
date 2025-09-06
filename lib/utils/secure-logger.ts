@@ -25,9 +25,11 @@ class SecureLogger {
 
   private sanitizeData(data: any): any {
     if (typeof data === 'string') {
-      // Remover información sensible
+      // Remover información sensible (MEJORADO para URLs)
       return data
         .replace(/password[=:]\s*[^\s&]+/gi, 'password=***')
+        .replace(/&password=[^&]*/gi, '&password=***') // Específico para URLs
+        .replace(/\?password=[^&]*/gi, '?password=***') // Específico para URLs
         .replace(/token[=:]\s*[^\s&]+/gi, 'token=***')
         .replace(/secret[=:]\s*[^\s&]+/gi, 'secret=***')
         .replace(/key[=:]\s*[^\s&]+/gi, 'key=***')
