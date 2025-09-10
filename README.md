@@ -14,7 +14,7 @@ Una plataforma de radio comunitaria donde cada oyente tiene voz y voto en las de
 
 ### 👤 Sistema de Usuarios
 - Registro personalizado para oyentes
-- Autenticación segura con JWT
+- Autenticación segura con JWT (en desarrollo)
 - Perfiles de usuario con estadísticas
 - Sistema de niveles y puntos
 
@@ -30,6 +30,5 @@ Una plataforma de radio comunitaria donde cada oyente tiene voz y voto en las de
 - **Framework**: [Next.js](https://nextjs.org/)
 - **Database**: [Postgres](https://www.postgresql.org/)
 - **ORM**: [Drizzle](https://orm.drizzle.team/)
-- **Payments**: [Stripe](https://stripe.com/)
 - **UI Library**: [shadcn/ui](https://ui.shadcn.com/)
 
